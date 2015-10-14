@@ -114,8 +114,8 @@
 		var transform = d3.geo.transform({point: projectStream});
 		var path = d3.geo.path().projection(transform);
 
-	  	funtion updateData() {
-	  	d3.json("/getData/", function(data) {
+	  	function updateData(){
+	  		d3.json("/getData/", function(data) {
 
 			//create placeholder circle geometry and bind it to data
 			var circles = g.selectAll("circle").data(data.features);
@@ -159,17 +159,15 @@
 			    	.attr("cx", function(d) { return projectPoint(d.geometry.coordinates[0], d.geometry.coordinates[1]).x; })
 			    	.attr("cy", function(d) { return projectPoint(d.geometry.coordinates[0], d.geometry.coordinates[1]).y; })
 	    			.attr("r", function(d) { return Math.pow(d.properties.price,.3); });
-			};
+				};
 
 			// call function to 
 			update();
 			map.on("viewreset", update);
 
 		});
-		};
-
-	updateData();
-
+};
+updateData();
 	</script>
 
 </body>
