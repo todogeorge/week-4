@@ -19,6 +19,36 @@
 			fill: red;
 			stroke-width: 0px;
 		}
+
+		circle:hover {
+    		stroke: black;
+    		stroke-width: 2px;
+    		cursor: crosshair;
+		}
+
+		div.tooltip{
+    		padding: 6px;
+   			 background: white;}
+
+		p.tooltip-text{
+    		margin: 0px;
+   			 padding: 0px;}
+
+   		body {
+    	padding: 0;
+    	margin: 0;
+    	font-family: Helvetica, Arial, sans-serif;
+    	font-size: 12px;
+    	line-height: 18px;}
+
+    	div.tooltip{
+    	padding: 6px;
+    	background: white;
+    	visibility: hidden;
+    	position: absolute;
+    	z-index: 10;
+}
+
 	</style>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -28,12 +58,16 @@
 
 	<div id="map"></div>
 
-	<div class="tooltip" style="position: absolute; z-index: 10; top: 100px; left: 100px">
+	<div class="tooltip"
     <p class="tooltip-text" id="title">This is the title</p>
     <p class="tooltip-text" id="price">This is the price</p>
-</div>
+	</div>
 
 	<script type="text/javascript">
+
+		var tooltip = d3.select("div.tooltip");
+		var tooltip_title = d3.select("#title");
+		var tooltip_price = d3.select("#price");
 
 		var map = L.map('map').setView([22.539029, 114.062076], 16);
 
@@ -75,6 +109,17 @@
 
 			circles.enter()
 				.append("circle")
+				.on("mouseover", function(d){
+        tooltip.style("visibility", "visible");
+       	tooltip_title.text(d.properties.name);
+        tooltip_price.text("Price: " + d.properties.price);
+    })
+    .on("mousemove", function(){
+        return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+    })
+    .on("mouseout", function(){
+        return tooltip.style("visibility", "hidden");
+    });
 
 			// function to update the data
 			function update() {
