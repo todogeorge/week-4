@@ -41,15 +41,16 @@
 		}
 
 		div.menu{
-			position: fixed;
-			margin: 0px;
-			padding: 10px;
-			top: 0px;
-			right: 0px;
-			width: 250px;
-			height: 500px;
-			background: rgba(255,255,255,.8);
+    		position: fixed;
+    		margin: 0px;
+    		padding: 10px;
+    		top: 0px;
+    		right: 0px;
+    		width: 250px;
+    		height: 500px;
+    		background: rgba(255,255,255,.8);
 		}
+
 	</style>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -65,13 +66,12 @@
 	</div>
 
 	<div class="menu">
-		<p><h4>DMC Web Stack</h4></p>
-		<form>
-			<p><input id="heatmap" type="checkbox">Heat Map</p>
-			<p><input type="button" value="Update Data" onclick="updateData()"></p>
-		</form>
+    <p><h4>DMC Web Stack</h4></p>
+    <form>
+        <p><input type="checkbox" id="heatmap">Heat Map</p>
+        <p><input type="button" value="Update Data" onclick="updateData()"></p>
+    </form>
 	</div>
-
 
 	<script type="text/javascript">
 
@@ -114,63 +114,70 @@
 		var transform = d3.geo.transform({point: projectStream});
 		var path = d3.geo.path().projection(transform);
 
-		function updateData(){
-		  	d3.json("/getData/", function(data) {
+	  	function updateData(){
 
-				//create placeholder circle geometry and bind it to data
-				var circles = g.selectAll("circle").data(data.features);
+	  		var mapBounds = map.getBounds();
+			var lat1 = mapBounds["_southWest"]["lat"];
+			var lat2 = mapBounds["_northEast"]["lat"];
+			var lng1 = mapBounds["_southWest"]["lng"];
+			var lng2 = mapBounds["_northEast"]["lng"];
 
-				circles.enter()
-					.append("circle")
-					.on("mouseover", function(d){
-						tooltip.style("visibility", "visible");
-						tooltip_title.text(d.properties.name);
-						tooltip_price.text("Price: " + d.properties.price);
-					})
-					.on("mousemove", function(){
-						tooltip.style("top", (d3.event.pageY-10)+"px")
-						tooltip.style("left",(d3.event.pageX+10)+"px");
-					})
-					.on("mouseout", function(){
-						tooltip.style("visibility", "hidden");
-					})
-				;
+			request = "/getData?lat1=" + lat1 + "&lat2=" + lat2 + "&lng1=" + lng1 + "&lng2=" + lng2
 
-				// function to update the data
-				function update() {
+	  		d3.json(request, function(data) {
 
-					// get bounding box of data
-				    var bounds = path.bounds(data),
-				        topLeft = bounds[0],
-				        bottomRight = bounds[1];
+			//create placeholder circle geometry and bind it to data
+			var circles = g.selectAll("circle").data(data.features);
 
-				    var buffer = 50;
+			circles.enter()
+				.append("circle")
+				.on("mouseover", function(d){
+					tooltip.style("visibility", "visible");
+					tooltip_title.text(d.properties.name);
+					tooltip_price.text("Price: " + d.properties.price);
+				})
+				.on("mousemove", function(){
+					tooltip.style("top", (d3.event.pageY-10)+"px")
+					tooltip.style("left",(d3.event.pageX+10)+"px");
+				})
+				.on("mouseout", function(){
+					tooltip.style("visibility", "hidden");
+				})
+			;
 
-				    // reposition the SVG to cover the features.
-				    svg .attr("width", bottomRight[0] - topLeft[0] + (buffer * 2))
-				        .attr("height", bottomRight[1] - topLeft[1] + (buffer * 2))
-				        .style("left", (topLeft[0] - buffer) + "px")
-				        .style("top", (topLeft[1] - buffer) + "px");
+			// function to update the data
+			function update() {
 
-				    g   .attr("transform", "translate(" + (-topLeft[0] + buffer) + "," + (-topLeft[1] + buffer) + ")");
+				// get bounding box of data
+			    var bounds = path.bounds(data),
+			        topLeft = bounds[0],
+			        bottomRight = bounds[1];
 
-				    // update circle position and size
-				    circles
-				    	.attr("cx", function(d) { return projectPoint(d.geometry.coordinates[0], d.geometry.coordinates[1]).x; })
-				    	.attr("cy", function(d) { return projectPoint(d.geometry.coordinates[0], d.geometry.coordinates[1]).y; })
-		    			.attr("r", function(d) { return Math.pow(d.properties.price,.3); });
+			    var buffer = 50;
+
+			    // reposition the SVG to cover the features.
+			    svg .attr("width", bottomRight[0] - topLeft[0] + (buffer * 2))
+			        .attr("height", bottomRight[1] - topLeft[1] + (buffer * 2))
+			        .style("left", (topLeft[0] - buffer) + "px")
+			        .style("top", (topLeft[1] - buffer) + "px");
+
+			    g   .attr("transform", "translate(" + (-topLeft[0] + buffer) + "," + (-topLeft[1] + buffer) + ")");
+
+			    // update circle position and size
+			    circles
+			    	.attr("cx", function(d) { return projectPoint(d.geometry.coordinates[0], d.geometry.coordinates[1]).x; })
+			    	.attr("cy", function(d) { return projectPoint(d.geometry.coordinates[0], d.geometry.coordinates[1]).y; })
+	    			.attr("r", function(d) { return Math.pow(d.properties.price,.3); });
 				};
 
-				// call function to 
-				update();
-				map.on("viewreset", update);
-			});
+			// call function to 
+			update();
+			map.on("viewreset", update);
 
-		};
-
-		updateData();
-
+		});
+};
+updateData();
 	</script>
 
 </body>
-</html> 
+</html>
